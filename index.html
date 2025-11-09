@@ -41,6 +41,27 @@
     letter-spacing:0.3px;
   }
 
+  #startStopBtn {
+  width: 150px;
+  background-color: #415a77;
+  border: none;
+  color: #e0e1dd;
+  padding: 12px 20px;
+  margin: 10px;
+  font-size: 1.1em;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+}
+
+#startStopBtn.active {
+  background-color: #89cff0;
+  box-shadow: 0 0 20px #89cff0;
+  color: #0d1b2a;
+}
+
+
   .container{
     width:100%;
     max-width:820px;
@@ -226,6 +247,8 @@
         <button class="button wide" id="pauseBtn">Pause Timer</button>
         <button class="button wide" id="skipBtn">Skip (mark Unattempted)</button>
         <button class="button wide" id="endBtn">End Test</button>
+        <button id="startStopBtn" class="button">Start</button>
+
       </div>
 
       <div class="small">When paused, Space / tap won't start/stop — press Resume to continue.</div>
@@ -490,6 +513,32 @@
       toggleStartStop();
     }
   });
+  const startStopBtn = document.getElementById("startStopBtn");
+
+function handleStartStop() {
+  if (!isRunning) {
+    startTimer();
+    startStopBtn.textContent = "Stop";
+    startStopBtn.classList.add("active");
+  } else {
+    stopTimer();
+    startStopBtn.textContent = "Start";
+    startStopBtn.classList.remove("active");
+  }
+}
+
+if (/Mobi|Android/i.test(navigator.userAgent)) {
+  // Only for mobile devices
+  startStopBtn.style.display = "inline-block";
+  startStopBtn.addEventListener("click", handleStartStop);
+} else {
+  // Hide on desktop (spacebar control instead)
+  startStopBtn.style.display = "none";
+  document.body.addEventListener("keydown", (e) => {
+    if (e.code === "Space") handleStartStop();
+  });
+}
+
 
   // click/tap on body toggles (ignore if clicking buttons or inputs or modal)
   function isInteractive(el){
@@ -497,20 +546,20 @@
   }
 
   // Click — desktop
-  document.body.addEventListener('click', (e) => {
-    if (isInteractive(e.target)) return;
-    if (testArea.style.display === 'none') return;
-    toggleStartStop();
-  });
+  // document.body.addEventListener('click', (e) => {
+  //   if (isInteractive(e.target)) return;
+  //   if (testArea.style.display === 'none') return;
+  //   toggleStartStop();
+  // });
 
   // Touch — mobile (use touchstart but prevent double-fire)
-  document.body.addEventListener('touchstart', (e) => {
-    if (isInteractive(e.target)) return;
-    if (testArea.style.display === 'none') return;
-    // prevent default scrolling only when tapping the main area (so test is responsive)
-    e.preventDefault();
-    toggleStartStop();
-  }, { passive: false });
+  // document.body.addEventListener('touchstart', (e) => {
+  //   if (isInteractive(e.target)) return;
+  //   if (testArea.style.display === 'none') return;
+  //   // prevent default scrolling only when tapping the main area (so test is responsive)
+  //   e.preventDefault();
+  //   toggleStartStop();
+  // }, { passive: false });
 
   // initialize: show setup modal on first load
   (function init(){
@@ -524,3 +573,4 @@
 </script>
 </body>
 </html>
+
