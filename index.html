@@ -1,331 +1,522 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Question Timer | KRID Labs</title>
-<link rel="icon" type="image/png" href="favicon.png">
 <style>
-  body {
-    font-family: 'Segoe UI', sans-serif;
-    background-color: #0d1b2a;
-    color: #e0e1dd;
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    min-height: 100vh;
-    overflow-x: hidden;
+  :root{
+    --bg: #0d1b2a;
+    --panel: #1b263b;
+    --btn: #415a77;
+    --hover: #778da9;
+    --text: #e0e1dd;
+    --timer: #89cff0;
+    --glass: rgba(255,255,255,0.03);
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family: "Segoe UI", Roboto, system-ui, -apple-system, "Helvetica Neue", Arial;
+    background:var(--bg);
+    color:var(--text);
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:20px;
   }
 
-  h1 {
-    margin-top: 20px;
-    color: #89cff0;
-    text-shadow: 0 0 8px rgba(137,207,240,0.5);
-    text-align: center;
+  header h1{
+    margin:8px 0 12px;
+    color:var(--timer);
+    text-shadow:0 0 8px rgba(137,207,240,0.28);
+    font-size:1.4rem;
+    letter-spacing:0.3px;
   }
 
-  .container {
-    background-color: #1b263b;
-    border-radius: 16px;
-    padding: 20px;
-    max-width: 500px;
-    width: 90%;
-    text-align: center;
-    box-shadow: 0 0 20px rgba(0,0,0,0.4);
-    margin-top: 20px;
+  .container{
+    width:100%;
+    max-width:820px;
+    background:linear-gradient(180deg, rgba(255,255,255,0.015), rgba(255,255,255,0.01));
+    border-radius:14px;
+    padding:18px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.45);
+    border:1px solid rgba(255,255,255,0.02);
+    margin-top:6px;
   }
 
-  .timer {
-    font-size: 2.5em;
-    margin: 15px 0;
-    color: #89cff0;
-    text-shadow: 0 0 10px rgba(137,207,240,0.7);
+  .top{
+    display:flex;
+    justify-content:space-between;
+    gap:12px;
+    align-items:center;
+    flex-wrap:wrap;
   }
 
-  .button {
-    background-color: #415a77;
-    border: none;
-    color: #e0e1dd;
-    padding: 10px 20px;
-    margin: 10px;
-    font-size: 1em;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.3s ease;
+  .left{
+    display:flex;
+    gap:14px;
+    align-items:center;
   }
 
-  .button:hover {
-    background-color: #778da9;
-    box-shadow: 0 0 10px #778da9;
+  .num-card{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+  }
+  .num-card label{ font-size:0.9rem; color:#b8c3d0 }
+  input[type="number"]{
+    width:110px;
+    padding:8px 10px;
+    border-radius:10px;
+    border:1px solid rgba(255,255,255,0.03);
+    background:var(--panel);
+    color:var(--text);
+    text-align:center;
+    font-size:1rem;
   }
 
-  #startStopBtn {
-    width: 150px;
-    background-color: #415a77;
-    border: none;
-    color: #e0e1dd;
-    padding: 12px 20px;
-    margin: 10px;
-    font-size: 1.1em;
-    border-radius: 10px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+  .controls{
+    display:flex;
+    gap:10px;
+    align-items:center;
   }
 
-  #startStopBtn.active {
-    background-color: #89cff0;
-    box-shadow: 0 0 20px #89cff0;
-    color: #0d1b2a;
+  .button{
+    background:var(--btn);
+    color:var(--text);
+    padding:10px 14px;
+    border-radius:10px;
+    border:none;
+    cursor:pointer;
+    font-size:0.95rem;
+    transition:all .22s ease;
+  }
+  .button:hover{ background:var(--hover); box-shadow:0 0 12px rgba(119,141,169,0.14) }
+
+  .progress-wrap{ margin-top:14px }
+  .progress-bar{
+    height:12px;
+    background:var(--glass);
+    border-radius:10px;
+    overflow:hidden;
+  }
+  .progress-fill{
+    height:100%;
+    width:0%;
+    background:linear-gradient(90deg,var(--timer),var(--hover));
+    transition:width .28s ease;
   }
 
-  .progress-container {
-    width: 100%;
-    background-color: #415a77;
-    border-radius: 8px;
-    overflow: hidden;
-    margin-bottom: 15px;
+  .center{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:12px;
+    margin-top:18px;
+    padding:8px 6px 18px;
   }
 
-  .progress-bar {
-    height: 10px;
-    background-color: #89cff0;
-    width: 0%;
-    transition: width 0.3s ease;
+  .question-label{ font-size:1.05rem; color:var(--text); }
+  .timer{
+    font-size:3rem;
+    font-weight:700;
+    color:var(--timer);
+    text-shadow:0 0 12px rgba(137,207,240,0.2);
   }
 
-  .results {
-    margin-top: 20px;
-    text-align: left;
-    color: #e0e1dd;
+  .action-row{ display:flex; gap:10px; flex-wrap:wrap; width:100%; justify-content:center; margin-top:6px }
+  .wide{ min-width:150px; }
+
+  .small{ font-size:0.9rem; color:#9fb0c6 }
+
+  .results{
+    margin-top:18px;
+    background:rgba(255,255,255,0.02);
+    border-radius:10px;
+    padding:12px;
   }
 
-  .footer {
-    text-align: center;
-    margin-top: auto;
-    padding: 15px;
-    color: #778da9;
-    font-size: 0.9em;
+  table{ width:100%; border-collapse:collapse; color:var(--text) }
+  th, td{ padding:8px; border-bottom:1px solid rgba(255,255,255,0.03); text-align:center }
+  th{ color:var(--hover); font-weight:700; font-size:0.95rem }
+
+  footer{
+    margin-top:20px;
+    color:#94a0b3;
+    font-size:0.9rem;
+    text-align:center;
+    width:100%;
   }
 
-  /* Setup modal */
-  .modal {
-    position: fixed;
-    bottom: -100%;
-    left: 50%;
-    transform: translateX(-50%);
-    background-color: #1b263b;
-    color: #e0e1dd;
-    padding: 30px;
-    border-radius: 16px 16px 0 0;
-    box-shadow: 0 -4px 30px rgba(0,0,0,0.5);
-    width: 90%;
-    max-width: 400px;
-    text-align: center;
-    transition: bottom 0.6s ease;
-    z-index: 10;
+  /* Modal (slide-up from bottom) */
+  .setup-overlay{
+    position:fixed; inset:0; display:flex; align-items:flex-end; justify-content:center;
+    background:linear-gradient(rgba(2,6,10,0.45), rgba(2,6,10,0.55)); z-index:80;
+  }
+  .setup-card{
+    width:100%;
+    max-width:520px;
+    background:var(--panel);
+    border-radius:14px 14px 0 0;
+    padding:20px;
+    transform:translateY(100%);
+    animation: slideUp .42s ease forwards;
+    box-shadow:0 -8px 40px rgba(0,0,0,0.6);
+    border-top:3px solid rgba(137,207,240,0.06);
+  }
+  @keyframes slideUp{
+    from{ transform:translateY(100%); opacity:0 }
+    to{ transform:translateY(0); opacity:1 }
   }
 
-  .modal.show {
-    bottom: 0;
+  .setup-row{ display:flex; gap:12px; align-items:center; justify-content:space-between; flex-wrap:wrap }
+  .setup-title{
+    color:var(--timer);
+    font-size:1.15rem;
+    margin-bottom:8px;
+    font-weight:700;
   }
 
-  .modal input {
-    width: 80%;
-    padding: 10px;
-    margin-top: 10px;
-    border-radius: 8px;
-    border: none;
-    outline: none;
-    text-align: center;
-    font-size: 1.1em;
-  }
+  .modal-note{ color:#98a6b6; font-size:0.92rem; margin-top:8px }
 
-  .modal button {
-    margin-top: 15px;
-    padding: 10px 20px;
-    border-radius: 8px;
-    border: none;
-    background-color: #89cff0;
-    color: #0d1b2a;
-    font-weight: bold;
-    cursor: pointer;
-    transition: 0.3s ease;
-  }
-
-  .modal button:hover {
-    box-shadow: 0 0 10px #89cff0;
-  }
-
-  @media (max-width: 768px) {
-    .container {
-      width: 95%;
-    }
+  @media (max-width:620px){
+    .timer{ font-size:2.4rem }
+    input[type="number"]{ width:88px }
+    .wide{ min-width:120px }
+    .setup-card{ padding:16px }
   }
 </style>
 </head>
 <body>
-  <h1>Question Timer</h1>
-  <div class="container" id="mainContainer" style="display:none;">
-    <div class="progress-container"><div class="progress-bar" id="progressBar"></div></div>
-    <div id="questionLabel">Question 1</div>
-    <div class="timer" id="timerDisplay">00:00.00</div>
+  <header><h1>Question Timer — KRID Labs</h1></header>
 
-    <button id="startStopBtn">Start</button>
-    <button class="button" id="pauseBtn">Pause</button>
-    <button class="button" id="skipBtn">Skip</button>
-    <button class="button" id="endBtn">End Test</button>
+  <main class="container" id="app">
+    <div class="top">
+      <div class="left">
+        <div class="num-card">
+          <label class="small">Questions (editable before start)</label>
+          <input id="numInput" type="number" min="1" max="200" value="10" />
+        </div>
+        <div class="small" style="margin-left:6px">Tip: press Space (desktop) or tap screen (mobile) to Start/Stop</div>
+      </div>
 
-    <div class="results" id="results"></div>
-  </div>
+      <div class="controls">
+        <button class="button" id="openSetup">Change Setup</button>
+        <button class="button" id="restartBtn">Restart Session</button>
+      </div>
+    </div>
 
-  <div class="modal show" id="setupModal">
-    <h2>Set Number of Questions</h2>
-    <input type="number" id="questionInput" placeholder="Enter number (e.g., 10)">
-    <br>
-    <button id="startTestBtn">Start Test</button>
-  </div>
+    <div class="progress-wrap">
+      <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    </div>
 
-  <div class="footer">
-    © KRID Labs | Built to Think. Designed to Feel. | Founded by Pranav Joshi
+    <div class="center" id="testArea" style="display:none;">
+      <div class="question-label" id="questionLabel">Question 1 of 10</div>
+      <div class="timer" id="timer">0.00 s</div>
+
+      <div class="action-row">
+        <button class="button wide" id="pauseBtn">Pause Timer</button>
+        <button class="button wide" id="skipBtn">Skip (mark Unattempted)</button>
+        <button class="button wide" id="endBtn">End Test</button>
+      </div>
+
+      <div class="small">When paused, Space / tap won't start/stop — press Resume to continue.</div>
+    </div>
+
+    <div class="results" id="results" style="display:none"></div>
+  </main>
+
+  <footer>© 2025 KRID Labs | Built to Think. Designed to Feel. <br> Founded by <strong>Pranav Joshi</strong></footer>
+
+  <!-- Slide-up setup modal -->
+  <div class="setup-overlay" id="setupOverlay" style="display:flex">
+    <div class="setup-card" role="dialog" aria-modal="true" aria-labelledby="setupTitle">
+      <div class="setup-row">
+        <div>
+          <div class="setup-title" id="setupTitle">Start a new session</div>
+          <div class="small">How many questions would you like to attempt?</div>
+          <div style="margin-top:12px; display:flex; gap:10px; align-items:center;">
+            <input id="modalNum" type="number" min="1" max="200" value="10" />
+            <button class="button" id="startBtn">Start Test</button>
+          </div>
+          <div class="modal-note">You can change the number later by clicking "Change Setup".</div>
+        </div>
+        <div style="min-width:120px; text-align:right; align-self:center;">
+          <div style="font-weight:700; color:var(--hover);">KRID Labs</div>
+          <div class="small" style="margin-top:8px">Built to Think. Designed to Feel.</div>
+        </div>
+      </div>
+    </div>
   </div>
 
 <script>
-  let totalQuestions = 10;
-  let currentQuestion = 1;
-  let isRunning = false;
-  let isPaused = false;
-  let startTime = 0;
-  let elapsedTime = 0;
-  let timerInterval;
-  const times = [];
+(function(){
+  // Elements
+  const setupOverlay = document.getElementById('setupOverlay');
+  const modalNum = document.getElementById('modalNum');
+  const startBtn = document.getElementById('startBtn');
+  const openSetup = document.getElementById('openSetup');
+  const numInput = document.getElementById('numInput');
+  const restartBtn = document.getElementById('restartBtn');
 
-  const timerDisplay = document.getElementById("timerDisplay");
-  const progressBar = document.getElementById("progressBar");
-  const questionLabel = document.getElementById("questionLabel");
-  const resultsDiv = document.getElementById("results");
-  const startStopBtn = document.getElementById("startStopBtn");
-  const pauseBtn = document.getElementById("pauseBtn");
-  const skipBtn = document.getElementById("skipBtn");
-  const endBtn = document.getElementById("endBtn");
-  const setupModal = document.getElementById("setupModal");
-  const mainContainer = document.getElementById("mainContainer");
+  const testArea = document.getElementById('testArea');
+  const timerEl = document.getElementById('timer');
+  const questionLabel = document.getElementById('questionLabel');
+  const progressFill = document.getElementById('progressFill');
+  const pauseBtn = document.getElementById('pauseBtn');
+  const skipBtn = document.getElementById('skipBtn');
+  const endBtn = document.getElementById('endBtn');
+  const resultsDiv = document.getElementById('results');
 
-  document.getElementById("startTestBtn").addEventListener("click", () => {
-    const inputVal = parseInt(document.getElementById("questionInput").value);
-    if (isNaN(inputVal) || inputVal <= 0) {
-      alert("Please enter a valid number of questions.");
-      return;
+  // State
+  let totalQ = 10;
+  let current = 1;
+  let running = false;
+  let paused = false;
+  let startTs = 0;
+  let pausedOffset = 0; // ms
+  let timerId = null;
+  let times = []; // ms or null for unattempted
+
+  // Utils
+  const fmt = ms => (ms/1000).toFixed(2) + ' s';
+
+  function updateQuestionLabel(){
+    questionLabel.textContent = `Question ${current} of ${totalQ}`;
+    const pct = Math.round(((current - 1) / totalQ) * 100);
+    progressFill.style.width = pct + '%';
+  }
+
+  function renderResults(showCard){
+    // show results table
+    const rows = times.map((t, i) => {
+      if (t === null) return `<tr><td>${i+1}</td><td>Unattempted</td></tr>`;
+      if (typeof t === 'number') return `<tr><td>${i+1}</td><td>${fmt(t)}</td></tr>`;
+      return `<tr><td>${i+1}</td><td>Unattempted</td></tr>`;
+    }).join('');
+    const totalMs = times.reduce((a, t) => a + (typeof t === 'number' ? t : 0), 0);
+    const attempted = times.filter(t => typeof t === 'number').length;
+    const avgMs = attempted ? (totalMs / attempted) : 0;
+
+    const html = `<h3>Results</h3>
+      <table>
+        <thead><tr><th>Question</th><th>Time</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+      <div style="margin-top:10px; font-size:0.95rem">Total (attempted): <strong>${fmt(totalMs)}</strong> • Average: <strong>${fmt(avgMs)}</strong></div>`;
+    resultsDiv.innerHTML = html;
+    resultsDiv.style.display = 'block';
+    progressFill.style.width = '100%';
+    if (showCard) showModal(false); // hide modal if open
+  }
+
+  function resetSession(opts={showModal:false}){
+    // reset runtime state, but do not change saved UI number unless showModal true
+    totalQ = parseInt(numInput.value) || 10;
+    current = 1;
+    running = false;
+    paused = false;
+    clearInterval(timerId);
+    timerId = null;
+    startTs = 0;
+    pausedOffset = 0;
+    times = Array(totalQ).fill(undefined);
+    timerEl.textContent = '0.00 s';
+    resultsDiv.style.display = 'none';
+    testArea.style.display = 'none';
+    updateQuestionLabel();
+    if (opts.showModal) showModal(true);
+  }
+
+  function showModal(show=true){
+    setupOverlay.style.display = show ? 'flex' : 'none';
+    if (show) {
+      // set modal input to current numInput
+      modalNum.value = parseInt(numInput.value) || 10;
     }
-    totalQuestions = inputVal;
-    setupModal.classList.remove("show");
-    mainContainer.style.display = "block";
-  });
-
-  function formatTime(ms) {
-    const totalSeconds = ms / 1000;
-    const minutes = Math.floor(totalSeconds / 60);
-    const seconds = Math.floor(totalSeconds % 60);
-    const milliseconds = Math.floor((ms % 1000) / 10);
-    return `${minutes.toString().padStart(2, "0")}:${seconds
-      .toString()
-      .padStart(2, "0")}.${milliseconds.toString().padStart(2, "0")}`;
   }
 
-  function updateTimer() {
-    const now = Date.now();
-    elapsedTime = now - startTime;
-    timerDisplay.textContent = formatTime(elapsedTime);
+  // Start / Stop / Pause logic
+  function startTimer(){
+    if (running) return;
+    running = true;
+    paused = false;
+    // compute start time with offset (if resuming)
+    startTs = Date.now() - pausedOffset;
+    timerId = setInterval(()=>{
+      const elapsed = Date.now() - startTs;
+      timerEl.textContent = fmt(elapsed);
+    }, 80);
+    pauseBtn.textContent = 'Pause Timer';
   }
 
-  function startTimer() {
-    if (isPaused) {
-      startTime = Date.now() - elapsedTime;
-      isPaused = false;
+  function stopTimerRecord(){
+    if (!running && !paused) return;
+    clearInterval(timerId);
+    timerId = null;
+    // If paused: pausedOffset contains ms elapsed, else compute elapsed now
+    const elapsed = paused ? pausedOffset : (Date.now() - startTs);
+    times[current - 1] = elapsed;
+    timerEl.textContent = fmt(elapsed);
+    running = false;
+    paused = false;
+    pausedOffset = 0;
+    pauseBtn.textContent = 'Pause Timer';
+  }
+
+  function pauseToggle(){
+    if (!running && !paused) return; // nothing to pause
+    if (paused){
+      // resume
+      paused = false;
+      startTimer(); // startTimer uses pausedOffset to continue
+      pauseBtn.textContent = 'Pause Timer';
     } else {
-      startTime = Date.now();
+      // pause
+      paused = true;
+      clearInterval(timerId);
+      timerId = null;
+      pausedOffset = Date.now() - startTs;
+      pauseBtn.textContent = 'Resume Timer';
+      timerEl.textContent = fmt(pausedOffset);
     }
-    timerInterval = setInterval(updateTimer, 10);
-    isRunning = true;
   }
 
-  function stopTimer() {
-    clearInterval(timerInterval);
-    isRunning = false;
-  }
-
-  function handleStartStop() {
-    if (!isRunning) {
-      startTimer();
-      startStopBtn.textContent = "Stop";
-      startStopBtn.classList.add("active");
+  function nextQuestion(){
+    if (current < totalQ){
+      current++;
+      updateQuestionLabel();
+      timerEl.textContent = '0.00 s';
+      startTs = 0;
+      pausedOffset = 0;
+      paused = false;
+      running = false;
+      pauseBtn.textContent = 'Pause Timer';
     } else {
-      stopTimer();
-      times.push(elapsedTime);
-      nextQuestion();
-      startStopBtn.textContent = "Start";
-      startStopBtn.classList.remove("active");
-      elapsedTime = 0;
-      timerDisplay.textContent = "00:00.00";
+      // finished all questions
+      // fill any undefined as unattempted
+      for (let i=0;i<times.length;i++){
+        if (typeof times[i] === 'undefined') times[i] = null;
+      }
+      renderResults(true);
     }
   }
 
-  function nextQuestion() {
-    if (currentQuestion < totalQuestions) {
-      currentQuestion++;
-      questionLabel.textContent = `Question ${currentQuestion}`;
-      progressBar.style.width = `${(currentQuestion - 1) / totalQuestions * 100}%`;
-    } else {
-      endTest();
+  function skipCurrent(){
+    // If running or paused, stop timer but mark as unattempted
+    if (running || paused){
+      clearInterval(timerId);
+      timerId = null;
+      running = false;
+      paused = false;
     }
-  }
-
-  function skipQuestion() {
-    times.push("Skipped");
+    times[current - 1] = null; // unattempted
     nextQuestion();
-    elapsedTime = 0;
-    timerDisplay.textContent = "00:00.00";
   }
 
-  function pauseTimer() {
-    if (isRunning) {
-      clearInterval(timerInterval);
-      isPaused = true;
-      isRunning = false;
+  // toggle start/stop via space or tap (if not paused)
+  function toggleStartStop(){
+    if (paused) return; // while paused ignore toggles; user must resume
+    if (running){
+      stopTimerRecord();
+      nextQuestion();
+    } else {
+      startTimer();
     }
   }
 
-  function endTest() {
-    stopTimer();
-    let resultHTML = "<h3>Results</h3>";
-    times.forEach((time, index) => {
-      resultHTML += `<p>Q${index + 1}: ${
-        time === "Skipped" ? "Unattempted" : formatTime(time)
-      }</p>`;
-    });
-    resultsDiv.innerHTML = resultHTML;
-    progressBar.style.width = "100%";
+  // End test: stop everything, mark remaining undefined as unattempted
+  function endTest(){
+    if (running || paused){
+      // if running, record current time; if paused, record paused offset as time
+      if (running) {
+        stopTimerRecord();
+      } else if (paused) {
+        // decide: paused but user ends -> record elapsed so far
+        times[current - 1] = pausedOffset;
+        paused = false;
+        pausedOffset = 0;
+        pauseBtn.textContent = 'Pause Timer';
+      }
+    }
+    for (let i=0;i<times.length;i++){
+      if (typeof times[i] === 'undefined') times[i] = null;
+    }
+    renderResults(true);
   }
 
-  // Desktop: Spacebar control
-  document.body.addEventListener("keydown", (e) => {
-    if (!/Mobi|Android/i.test(navigator.userAgent)) {
-      if (e.code === "Space") handleStartStop();
+  // Event bindings
+  startBtn.addEventListener('click', ()=> {
+    // take number from modal input, set main input too
+    const n = parseInt(modalNum.value) || 10;
+    numInput.value = n;
+    // start session
+    showModal(false);
+    resetSession();
+    totalQ = n;
+    times = Array(totalQ).fill(undefined);
+    testArea.style.display = 'flex';
+    updateQuestionLabel();
+  });
+
+  openSetup.addEventListener('click', ()=> {
+    // open modal with current count
+    showModal(true);
+  });
+
+  restartBtn.addEventListener('click', ()=> {
+    // reset session but keep user-visible number
+    resetSession({showModal:false});
+    numInput.value = parseInt(numInput.value) || 10;
+    testArea.style.display = 'flex';
+  });
+
+  pauseBtn.addEventListener('click', pauseToggle);
+  skipBtn.addEventListener('click', skipCurrent);
+  endBtn.addEventListener('click', endTest);
+
+  // keyboard: space toggles
+  window.addEventListener('keydown', (e) => {
+    if (e.code === 'Space' || e.key === ' ') {
+      e.preventDefault();
+      toggleStartStop();
     }
   });
 
-  // Mobile: Button control only
-  if (/Mobi|Android/i.test(navigator.userAgent)) {
-    startStopBtn.style.display = "inline-block";
-    startStopBtn.addEventListener("click", handleStartStop);
-  } else {
-    startStopBtn.style.display = "none";
+  // click/tap on body toggles (ignore if clicking buttons or inputs or modal)
+  function isInteractive(el){
+    return el.closest && (el.closest('button') || el.closest('input') || el.closest('.setup-card'));
   }
 
-  pauseBtn.addEventListener("click", pauseTimer);
-  skipBtn.addEventListener("click", skipQuestion);
-  endBtn.addEventListener("click", endTest);
+  // Click — desktop
+  document.body.addEventListener('click', (e) => {
+    if (isInteractive(e.target)) return;
+    if (testArea.style.display === 'none') return;
+    toggleStartStop();
+  });
+
+  // Touch — mobile (use touchstart but prevent double-fire)
+  document.body.addEventListener('touchstart', (e) => {
+    if (isInteractive(e.target)) return;
+    if (testArea.style.display === 'none') return;
+    // prevent default scrolling only when tapping the main area (so test is responsive)
+    e.preventDefault();
+    toggleStartStop();
+  }, { passive: false });
+
+  // initialize: show setup modal on first load
+  (function init(){
+    // ensure inputs sync
+    modalNum.value = numInput.value = 10;
+    showModal(true);
+    resetSession();
+  })();
+
+})();
 </script>
 </body>
 </html>
