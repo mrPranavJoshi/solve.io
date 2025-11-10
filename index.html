@@ -1,230 +1,381 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Question Timer | KRID Labs</title>
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="icon" sizes="32x32" href="favicon.png">
+  <link rel="apple-touch-icon" href="favicon.png">
+
   <style>
+    :root {
+      --bg: #0d1b2a;
+      --panel: #1b263b;
+      --btn: #415a77;
+      --hover: #778da9;
+      --text: #e0e1dd;
+      --timer: #89cff0;
+      --glass: rgba(255, 255, 255, 0.03);
+    }
+
+    * {
+      box-sizing: border-box
+    }
+
     body {
-      background-color: #0d1b2a;
-      color: #e0e1dd;
-      font-family: "Segoe UI", sans-serif;
+      margin: 0;
+      font-family: "Segoe UI", Roboto, system-ui, -apple-system, "Helvetica Neue", Arial;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      margin: 0;
-      overflow-x: hidden;
+      padding: 20px;
     }
 
-    h1 {
-      color: #e0e1dd;
-      text-align: center;
-      margin-bottom: 10px;
+    header h1 {
+      margin: 8px 0 12px;
+      color: var(--timer);
+      text-shadow: 0 0 8px rgba(137, 207, 240, 0.28);
+      font-size: 1.4rem;
+      letter-spacing: 0.3px;
     }
 
-    .timer {
-      font-size: 3em;
-      font-weight: bold;
-      color: #e0e1dd;
-      margin: 20px;
-      text-shadow: 0 0 15px #89cff0;
+    .container {
+      width: 100%;
+      max-width: 820px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.015), rgba(255, 255, 255, 0.01));
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+      border: 1px solid rgba(255, 255, 255, 0.02);
+      margin-top: 6px;
     }
 
-    .buttons {
+    .top {
       display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
       flex-wrap: wrap;
-      justify-content: center;
+    }
+
+    .left {
+      display: flex;
+      gap: 14px;
+      align-items: center;
+    }
+
+    .num-card {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .num-card label {
+      font-size: 0.9rem;
+      color: #b8c3d0
+    }
+
+    input[type="number"] {
+      width: 110px;
+      padding: 8px 10px;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.03);
+      background: var(--panel);
+      color: var(--text);
+      text-align: center;
+      font-size: 1rem;
+    }
+
+    .controls {
+      display: flex;
       gap: 10px;
+      align-items: center;
     }
 
     .button {
-      background-color: #415a77;
-      color: #e0e1dd;
-      border: none;
+      background: var(--btn);
+      color: var(--text);
+      padding: 10px 14px;
       border-radius: 10px;
-      padding: 12px 25px;
-      font-size: 1.1em;
+      border: none;
       cursor: pointer;
-      transition: all 0.3s ease;
-      box-shadow: 0 0 10px rgba(255,255,255,0.2);
+      font-size: 0.95rem;
+      transition: all .22s ease;
     }
 
     .button:hover {
-      background-color: #89cff0;
-      color: #0d1b2a;
-      box-shadow: 0 0 15px #89cff0;
+      background: var(--hover);
+      box-shadow: 0 0 12px rgba(119, 141, 169, 0.14)
     }
 
-    #startStopBtn {
-      background-color: #415a77;
-      color: #e0e1dd;
+    .progress-wrap {
+      margin-top: 14px;
+    }
+
+    .progress-bar {
+      height: 12px;
+      background: var(--glass);
       border-radius: 10px;
-      padding: 14px 28px;
-      font-size: 1.2em;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--timer), var(--hover));
+      transition: width .28s ease;
+    }
+
+    .center {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      margin-top: 18px;
+      padding: 8px 6px 18px;
+    }
+
+    .question-label {
+      font-size: 1.05rem;
+    }
+
+    .timer {
+      font-size: 3rem;
+      font-weight: 700;
+      color: var(--timer);
+      text-shadow: 0 0 12px rgba(137, 207, 240, 0.2);
+    }
+
+    .action-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      width: 100%;
+      justify-content: center;
+      margin-top: 6px;
+    }
+
+    .wide {
+      min-width: 150px;
+    }
+
+    .small {
+      font-size: 0.9rem;
+      color: #9fb0c6;
+    }
+
+    .results {
+      margin-top: 18px;
+      background: rgba(255, 255, 255, 0.02);
+      border-radius: 10px;
+      padding: 12px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      color: var(--text);
+    }
+
+    th,
+    td {
+      padding: 8px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+      text-align: center;
+    }
+
+    th {
+      color: var(--hover);
+      font-weight: 700;
+      font-size: 0.95rem;
+    }
+
+    footer {
+      margin-top: 20px;
+      color: #94a0b3;
+      font-size: 0.9rem;
+      text-align: center;
+      width: 100%;
+    }
+
+    #mobileStartStop {
+      display: none;
+      width: 160px;
+      background-color: var(--btn);
+      color: var(--text);
       border: none;
-      cursor: pointer;
-      transition: 0.3s;
-      box-shadow: 0 0 10px rgba(255,255,255,0.2);
-      margin-top: 15px;
-      display: none;
+      border-radius: 10px;
+      padding: 12px;
+      font-size: 1rem;
+      margin-top: 8px;
+      transition: all .3s ease;
     }
 
-    #startStopBtn.active {
-      background-color: #89cff0;
-      box-shadow: 0 0 20px #89cff0;
-      color: #0d1b2a;
+    #mobileStartStop.active {
+      background-color: var(--timer);
+      color: var(--bg);
+      box-shadow: 0 0 20px var(--timer);
     }
 
-    .footer {
+    /* Modal */
+    .setup-overlay {
       position: fixed;
-      bottom: 8px;
-      font-size: 0.85em;
-      color: #778da9;
-      text-align: center;
+      inset: 0;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      background: linear-gradient(rgba(2, 6, 10, 0.45), rgba(2, 6, 10, 0.55));
+      z-index: 80;
     }
 
-    #result {
-      margin-top: 30px;
-      font-size: 1.1em;
-      max-width: 600px;
-      text-align: center;
+    .setup-card {
+      width: 100%;
+      max-width: 520px;
+      background: var(--panel);
+      border-radius: 14px 14px 0 0;
+      padding: 20px;
+      transform: translateY(100%);
+      animation: slideUp .42s ease forwards;
+      box-shadow: 0 -8px 40px rgba(0, 0, 0, 0.6);
+      border-top: 3px solid rgba(137, 207, 240, 0.06);
     }
 
-    .hidden {
-      display: none;
+    @keyframes slideUp {
+      from {
+        transform: translateY(100%);
+        opacity: 0
+      }
+
+      to {
+        transform: translateY(0);
+        opacity: 1
+      }
+    }
+
+    @media (max-width:620px) {
+      .timer {
+        font-size: 2.4rem
+      }
     }
   </style>
 </head>
+
 <body>
+  <header>
+    <h1>Question Timer — KRID Labs</h1>
+  </header>
 
-  <h1>Question Timer</h1>
+  <main class="container" id="app">
+    <div class="top">
+      <div class="left">
+        <div class="num-card">
+          <label class="small">Questions</label>
+          <input id="numInput" type="number" min="1" max="200" value="10" />
+        </div>
+        <div class="small">Space = Start/Stop (desktop)</div>
+      </div>
+      <div class="controls">
+        <button class="button" id="openSetup">Change Setup</button>
+        <button class="button" id="restartBtn">Restart Session</button>
+      </div>
+    </div>
 
-  <div class="timer" id="timer">00.00s</div>
-  <div id="questionLabel">Question 1</div>
+    <div class="progress-wrap">
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+    </div>
 
-  <div class="buttons">
-    <button id="pauseBtn" class="button">Pause</button>
-    <button id="skipBtn" class="button">Skip</button>
-  </div>
+    <div class="center" id="testArea" style="display:none;">
+      <div class="question-label" id="questionLabel">Question 1 of 10</div>
+      <div class="timer" id="timer">0.00 s</div>
+      <button id="mobileStartStop">Start</button>
 
-  <button id="startStopBtn">Start</button>
+      <div class="action-row">
+        <button class="button wide" id="pauseBtn">Pause Timer</button>
+        <button class="button wide" id="skipBtn">Skip (mark Unattempted)</button>
+        <button class="button wide" id="endBtn">End Test</button>
+      </div>
+      <div class="small">When paused, Space / button won't work — press Resume to continue.</div>
+    </div>
 
-  <div class="buttons">
-    <button id="endBtn" class="button">End Test</button>
-  </div>
+    <div class="results" id="results" style="display:none"></div>
+  </main>
 
-  <div id="result" class="hidden"></div>
+  <footer>© 2025 KRID Labs | Built to Think. Designed to Feel. <br> Founded by <strong>Pranav Joshi</strong></footer>
 
-  <div class="footer">
-    © KRID Labs | Built to Think. Designed to Feel. | Founded by Pranav Joshi
+  <div class="setup-overlay" id="setupOverlay" style="display:flex">
+    <div class="setup-card">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <div>
+          <div class="setup-title" style="color:var(--timer);font-weight:700;">Start a new session</div>
+          <div class="small">How many questions?</div>
+          <div style="margin-top:10px;display:flex;gap:10px;">
+            <input id="modalNum" type="number" min="1" max="200" value="10" />
+            <button class="button" id="startBtn">Start Test</button>
+          </div>
+        </div>
+        <div style="text-align:right;">
+          <div style="color:var(--hover);font-weight:700;">KRID Labs</div>
+          <div class="small">Built to Think. Designed to Feel.</div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <script>
-    let startTime, elapsed = 0, timerInterval, current = 0;
-    let totalQuestions = 10;
-    let times = Array(totalQuestions).fill(null);
-    let running = false;
-    let paused = false;
+    (function () {
+      const setupOverlay = document.getElementById('setupOverlay');
+      const modalNum = document.getElementById('modalNum');
+      const startBtn = document.getElementById('startBtn');
+      const openSetup = document.getElementById('openSetup');
+      const numInput = document.getElementById('numInput');
+      const restartBtn = document.getElementById('restartBtn');
+      const testArea = document.getElementById('testArea');
+      const timerEl = document.getElementById('timer');
+      const questionLabel = document.getElementById('questionLabel');
+      const progressFill = document.getElementById('progressFill');
+      const pauseBtn = document.getElementById('pauseBtn');
+      const skipBtn = document.getElementById('skipBtn');
+      const endBtn = document.getElementById('endBtn');
+      const resultsDiv = document.getElementById('results');
+      const mobileStartStop = document.getElementById('mobileStartStop');
 
-    const timerDisplay = document.getElementById("timer");
-    const resultDiv = document.getElementById("result");
-    const pauseBtn = document.getElementById("pauseBtn");
-    const skipBtn = document.getElementById("skipBtn");
-    const endBtn = document.getElementById("endBtn");
-    const startStopBtn = document.getElementById("startStopBtn");
-    const questionLabel = document.getElementById("questionLabel");
+      let totalQ = 10, current = 1, running = false, paused = false, startTs = 0, pausedOffset = 0, timerId = null, times = [];
 
-    function formatTime(sec) {
-      return sec.toFixed(2) + "s";
-    }
+      const fmt = ms => (ms / 1000).toFixed(2) + ' s';
+      function updateLabel() { questionLabel.textContent = `Question ${current} of ${totalQ}`; progressFill.style.width = Math.round(((current - 1) / totalQ) * 100) + '%'; }
+      function renderResults() { const rows = times.map((t, i) => t === null ? `<tr><td>${i + 1}</td><td>Unattempted</td></tr>` : `<tr><td>${i + 1}</td><td>${fmt(t)}</td></tr>`).join(''); const total = times.reduce((a, t) => a + (typeof t === 'number' ? t : 0), 0); const att = times.filter(t => typeof t === 'number').length; resultsDiv.innerHTML = `<h3>Results</h3><table><tr><th>Question</th><th>Time</th></tr>${rows}</table><div>Total: <b>${fmt(total)}</b> • Avg: <b>${fmt(att ? total / att : 0)}</b></div>`; resultsDiv.style.display = 'block'; progressFill.style.width = '100%'; }
+      function resetSession() { totalQ = parseInt(numInput.value) || 10; current = 1; running = false; paused = false; clearInterval(timerId); times = Array(totalQ).fill(undefined); timerEl.textContent = '0.00 s'; resultsDiv.style.display = 'none'; testArea.style.display = 'none'; updateLabel(); }
+      function showModal(s = true) { setupOverlay.style.display = s ? 'flex' : 'none'; if (s) modalNum.value = numInput.value; }
+      function startTimer() { if (running) return; running = true; paused = false; startTs = Date.now() - pausedOffset; timerId = setInterval(() => { timerEl.textContent = fmt(Date.now() - startTs) }, 80); mobileStartStop.textContent = 'Stop'; mobileStartStop.classList.add('active'); }
+      function stopRecord() { if (!running && !paused) return; clearInterval(timerId); const e = paused ? pausedOffset : Date.now() - startTs; times[current - 1] = e; timerEl.textContent = fmt(e); running = false; paused = false; pausedOffset = 0; mobileStartStop.textContent = 'Start'; mobileStartStop.classList.remove('active'); }
+      function nextQ() { if (current < totalQ) { current++; updateLabel(); timerEl.textContent = '0.00 s'; running = false; paused = false; } else { for (let i = 0; i < times.length; i++)if (typeof times[i] === 'undefined') times[i] = null; renderResults(); } }
+      function toggleStartStop() { if (paused) return; if (running) { stopRecord(); nextQ(); } else { startTimer(); } }
+      function pauseToggle() { if (!running && !paused) return; if (paused) { paused = false; startTimer(); pauseBtn.textContent = 'Pause Timer'; } else { paused = true; clearInterval(timerId); pausedOffset = Date.now() - startTs; pauseBtn.textContent = 'Resume Timer'; timerEl.textContent = fmt(pausedOffset); } }
+      function skipCurrent() { if (running || paused) { clearInterval(timerId); running = false; paused = false; } times[current - 1] = null; nextQ(); }
+      function endTest() { if (running || paused) { if (running) stopRecord(); else { times[current - 1] = pausedOffset; paused = false; } } for (let i = 0; i < times.length; i++)if (typeof times[i] === 'undefined') times[i] = null; renderResults(); }
 
-    function updateTimer() {
-      const now = Date.now();
-      elapsed = (now - startTime) / 1000;
-      timerDisplay.textContent = formatTime(elapsed);
-    }
+      startBtn.onclick = () => { const n = parseInt(modalNum.value) || 10; numInput.value = n; showModal(false); resetSession(); totalQ = n; times = Array(totalQ).fill(undefined); testArea.style.display = 'flex'; updateLabel(); };
+      openSetup.onclick = () => showModal(true);
+      restartBtn.onclick = () => { resetSession(); testArea.style.display = 'flex'; };
+      pauseBtn.onclick = pauseToggle; skipBtn.onclick = skipCurrent; endBtn.onclick = endTest;
 
-    function startTimer() {
-      startTime = Date.now();
-      timerInterval = setInterval(updateTimer, 10);
-      running = true;
-    }
+      window.addEventListener('keydown', e => { if (e.code === 'Space') { e.preventDefault(); toggleStartStop(); } });
 
-    function stopTimer() {
-      clearInterval(timerInterval);
-      running = false;
-      if (!paused) times[current] = elapsed;
-      elapsed = 0;
-      timerDisplay.textContent = "00.00s";
-      nextQuestion();
-    }
-
-    function nextQuestion() {
-      current++;
-      if (current >= totalQuestions) endTest();
-      else questionLabel.textContent = "Question " + (current + 1);
-    }
-
-    function endTest() {
-      clearInterval(timerInterval);
-      timerDisplay.textContent = "Finished!";
-      resultDiv.classList.remove("hidden");
-      resultDiv.innerHTML = "<h3>Results</h3>";
-      times.forEach((t, i) => {
-        resultDiv.innerHTML += `<div>Q${i + 1}: ${t ? formatTime(t) : "<i>Skipped</i>"}</div>`;
-      });
-      startStopBtn.style.display = "none";
-    }
-
-    function pauseTimer() {
-      if (running && !paused) {
-        clearInterval(timerInterval);
-        paused = true;
-        pauseBtn.textContent = "Resume";
-      } else if (paused) {
-        startTime = Date.now() - elapsed * 1000;
-        timerInterval = setInterval(updateTimer, 10);
-        paused = false;
-        pauseBtn.textContent = "Pause";
+      if (/Mobi|Android|iPhone/i.test(navigator.userAgent)) {
+        mobileStartStop.style.display = 'inline-block';
+        mobileStartStop.addEventListener('click', toggleStartStop);
       }
-    }
 
-    function skipQuestion() {
-      clearInterval(timerInterval);
-      running = false;
-      paused = false;
-      times[current] = null;
-      timerDisplay.textContent = "00.00s";
-      nextQuestion();
-    }
-
-    function handleStartStop() {
-      if (!running) {
-        startTimer();
-        startStopBtn.textContent = "Stop";
-        startStopBtn.classList.add("active");
-      } else {
-        stopTimer();
-        startStopBtn.textContent = "Start";
-        startStopBtn.classList.remove("active");
-      }
-    }
-
-    // Desktop: spacebar control
-    document.addEventListener("keydown", (e) => {
-      if (e.code === "Space") handleStartStop();
-    });
-
-    // Mobile: show button instead of spacebar
-    if (/Mobi|Android|iPhone/i.test(navigator.userAgent)) {
-      startStopBtn.style.display = "inline-block";
-      startStopBtn.addEventListener("click", handleStartStop);
-    }
-
-    pauseBtn.addEventListener("click", pauseTimer);
-    skipBtn.addEventListener("click", skipQuestion);
-    endBtn.addEventListener("click", endTest);
+      (function init() { modalNum.value = numInput.value = 10; showModal(true); resetSession(); })();
+    })();
   </script>
-</body
+</body>
+
+</html>
