@@ -201,7 +201,7 @@
           <label class="small">Questions (editable before start)</label>
           <input id="numInput" type="number" min="1" max="200" value="10" />
         </div>
-        <div class="small" style="margin-left:6px">Tip: press Space (desktop) or tap screen (mobile) to Start/Stop</div>
+        <div class="small" style="margin-left:6px">Tip: press Space (desktop) to Start/Stop</div>
       </div>
 
       <div class="controls">
@@ -224,7 +224,7 @@
         <button class="button wide" id="endBtn">End Test</button>
       </div>
 
-      <div class="small">When paused, Space / tap won't start/stop — press Resume to continue.</div>
+      <div class="small">When paused, Space won’t start/stop — press Resume to continue.</div>
     </div>
 
     <div class="results" id="results" style="display:none"></div>
@@ -239,9 +239,12 @@
         <div>
           <div class="setup-title" id="setupTitle">Start a new session</div>
           <div class="small">How many questions would you like to attempt?</div>
-          <div style="margin-top:12px; display:flex; gap:10px; align-items:center;">
-            <input id="modalNum" type="number" min="1" max="200" value="10" />
-            <button class="button" id="startBtn">Start Test</button>
+          <div style="margin-top:12px; display:flex; flex-direction:column; gap:10px; align-items:flex-start;">
+            <div style="display:flex; gap:10px;">
+              <input id="modalNum" type="number" min="1" max="200" value="10" />
+              <button class="button" id="startBtn">Start Test</button>
+              <button class="button" id="mobileStartBtn" style="display:none;">Start on Mobile</button>
+            </div>
           </div>
           <div class="modal-note">You can change the number later by clicking "Change Setup".</div>
         </div>
@@ -259,6 +262,7 @@
   const setupOverlay = document.getElementById('setupOverlay');
   const modalNum = document.getElementById('modalNum');
   const startBtn = document.getElementById('startBtn');
+  const mobileStartBtn = document.getElementById('mobileStartBtn');
   const openSetup = document.getElementById('openSetup');
   const numInput = document.getElementById('numInput');
   const restartBtn = document.getElementById('restartBtn');
@@ -278,11 +282,10 @@
   let running = false;
   let paused = false;
   let startTs = 0;
-  let pausedOffset = 0; // ms
+  let pausedOffset = 0;
   let timerId = null;
-  let times = []; // ms or null for unattempted
+  let times = [];
 
-  // Utils
   const fmt = ms => (ms/1000).toFixed(2) + ' s';
 
   function updateQuestionLabel(){
@@ -291,8 +294,7 @@
     progressFill.style.width = pct + '%';
   }
 
-  function renderResults(showCard){
-    // show results table
+  function renderResults(){
     const rows = times.map((t, i) => {
       if (t === null) return `<tr><td>${i+1}</td><td>Unattempted</td></tr>`;
       if (typeof t === 'number') return `<tr><td>${i+1}</td><td>${fmt(t)}</td></tr>`;
@@ -311,11 +313,9 @@
     resultsDiv.innerHTML = html;
     resultsDiv.style.display = 'block';
     progressFill.style.width = '100%';
-    if (showCard) showModal(false); // hide modal if open
   }
 
   function resetSession(opts={showModal:false}){
-    // reset runtime state, but do not change saved UI number unless showModal true
     totalQ = parseInt(numInput.value) || 10;
     current = 1;
     running = false;
@@ -334,23 +334,15 @@
 
   function showModal(show=true){
     setupOverlay.style.display = show ? 'flex' : 'none';
-    if (show) {
-      // set modal input to current numInput
-      modalNum.value = parseInt(numInput.value) || 10;
-    }
+    if (show) modalNum.value = parseInt(numInput.value) || 10;
   }
 
-  // Start / Stop / Pause logic
   function startTimer(){
     if (running) return;
     running = true;
     paused = false;
-    // compute start time with offset (if resuming)
     startTs = Date.now() - pausedOffset;
-    timerId = setInterval(()=>{
-      const elapsed = Date.now() - startTs;
-      timerEl.textContent = fmt(elapsed);
-    }, 80);
+    timerId = setInterval(()=>timerEl.textContent = fmt(Date.now() - startTs), 80);
     pauseBtn.textContent = 'Pause Timer';
   }
 
@@ -358,7 +350,6 @@
     if (!running && !paused) return;
     clearInterval(timerId);
     timerId = null;
-    // If paused: pausedOffset contains ms elapsed, else compute elapsed now
     const elapsed = paused ? pausedOffset : (Date.now() - startTs);
     times[current - 1] = elapsed;
     timerEl.textContent = fmt(elapsed);
@@ -369,14 +360,12 @@
   }
 
   function pauseToggle(){
-    if (!running && !paused) return; // nothing to pause
+    if (!running && !paused) return;
     if (paused){
-      // resume
       paused = false;
-      startTimer(); // startTimer uses pausedOffset to continue
+      startTimer();
       pauseBtn.textContent = 'Pause Timer';
     } else {
-      // pause
       paused = true;
       clearInterval(timerId);
       timerId = null;
@@ -397,30 +386,24 @@
       running = false;
       pauseBtn.textContent = 'Pause Timer';
     } else {
-      // finished all questions
-      // fill any undefined as unattempted
-      for (let i=0;i<times.length;i++){
-        if (typeof times[i] === 'undefined') times[i] = null;
-      }
-      renderResults(true);
+      for (let i=0;i<times.length;i++) if (typeof times[i] === 'undefined') times[i] = null;
+      renderResults();
     }
   }
 
   function skipCurrent(){
-    // If running or paused, stop timer but mark as unattempted
     if (running || paused){
       clearInterval(timerId);
       timerId = null;
       running = false;
       paused = false;
     }
-    times[current - 1] = null; // unattempted
+    times[current - 1] = null;
     nextQuestion();
   }
 
-  // toggle start/stop via space or tap (if not paused)
   function toggleStartStop(){
-    if (paused) return; // while paused ignore toggles; user must resume
+    if (paused) return;
     if (running){
       stopTimerRecord();
       nextQuestion();
@@ -429,32 +412,24 @@
     }
   }
 
-  // End test: stop everything, mark remaining undefined as unattempted
   function endTest(){
     if (running || paused){
-      // if running, record current time; if paused, record paused offset as time
-      if (running) {
-        stopTimerRecord();
-      } else if (paused) {
-        // decide: paused but user ends -> record elapsed so far
+      if (running) stopTimerRecord();
+      else if (paused){
         times[current - 1] = pausedOffset;
         paused = false;
         pausedOffset = 0;
         pauseBtn.textContent = 'Pause Timer';
       }
     }
-    for (let i=0;i<times.length;i++){
-      if (typeof times[i] === 'undefined') times[i] = null;
-    }
-    renderResults(true);
+    for (let i=0;i<times.length;i++) if (typeof times[i] === 'undefined') times[i] = null;
+    renderResults();
   }
 
-  // Event bindings
+  // Events
   startBtn.addEventListener('click', ()=> {
-    // take number from modal input, set main input too
     const n = parseInt(modalNum.value) || 10;
     numInput.value = n;
-    // start session
     showModal(false);
     resetSession();
     totalQ = n;
@@ -463,23 +438,33 @@
     updateQuestionLabel();
   });
 
-  openSetup.addEventListener('click', ()=> {
-    // open modal with current count
-    showModal(true);
+  mobileStartBtn.addEventListener('click', ()=> {
+    const n = parseInt(modalNum.value) || 10;
+    numInput.value = n;
+    showModal(false);
+    resetSession();
+    totalQ = n;
+    times = Array(totalQ).fill(undefined);
+    testArea.style.display = 'flex';
+    updateQuestionLabel();
   });
 
+  // Detect if mobile — show mobile button only
+  if (/Mobi|Android|iPhone/i.test(navigator.userAgent)) {
+    mobileStartBtn.style.display = 'inline-block';
+    startBtn.style.display = 'none';
+  }
+
+  openSetup.addEventListener('click', ()=> showModal(true));
   restartBtn.addEventListener('click', ()=> {
-    // reset session but keep user-visible number
     resetSession({showModal:false});
     numInput.value = parseInt(numInput.value) || 10;
     testArea.style.display = 'flex';
   });
-
   pauseBtn.addEventListener('click', pauseToggle);
   skipBtn.addEventListener('click', skipCurrent);
   endBtn.addEventListener('click', endTest);
 
-  // keyboard: space toggles
   window.addEventListener('keydown', (e) => {
     if (e.code === 'Space' || e.key === ' ') {
       e.preventDefault();
@@ -487,35 +472,12 @@
     }
   });
 
-  // click/tap on body toggles (ignore if clicking buttons or inputs or modal)
-  function isInteractive(el){
-    return el.closest && (el.closest('button') || el.closest('input') || el.closest('.setup-card'));
-  }
-
-  // Click — desktop
-  document.body.addEventListener('click', (e) => {
-    if (isInteractive(e.target)) return;
-    if (testArea.style.display === 'none') return;
-    toggleStartStop();
-  });
-
-  // Touch — mobile (use touchstart but prevent double-fire)
-  document.body.addEventListener('touchstart', (e) => {
-    if (isInteractive(e.target)) return;
-    if (testArea.style.display === 'none') return;
-    // prevent default scrolling only when tapping the main area (so test is responsive)
-    e.preventDefault();
-    toggleStartStop();
-  }, { passive: false });
-
-  // initialize: show setup modal on first load
+  // initialize
   (function init(){
-    // ensure inputs sync
     modalNum.value = numInput.value = 10;
     showModal(true);
     resetSession();
   })();
-
 })();
 </script>
 </body>
